@@ -171,6 +171,15 @@ export async function handleTwitchWebhook(
             };
         }
 
+
+        //make it better
+        case "revocation" : {
+            console.error(bodyJson);
+            return {
+                status: 204,
+            }
+        }
+
         default: {
             return {
                 status: 400,
