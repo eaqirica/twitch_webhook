@@ -3,17 +3,24 @@ import type { Subscription, SubscriptionFilter } from "./types";
 
 export const TWITCH_API_URL = "https://api.twitch.tv/helix/";
 
+export interface WebhookClientOptions {
+    clientId: string;
+    token: string;
+    callback: string;
+    secret: string;
+}
+
 export class Webhook_client {
     private client_id: string;
     private token: string;
     private callback: string;
     private secret: string;
 
-    constructor(clientId: string, token: string, callback: string, secret: string) {
-        this.client_id = clientId;
-        this.token = token;
-        this.callback = callback;
-        this.secret = secret;
+    constructor(options: WebhookClientOptions) {
+        this.client_id = options.clientId;
+        this.token = options.token;
+        this.callback = options.callback;
+        this.secret = options.secret;
     }
 
     async subscribe<K extends keyof Conditions>(event: K, condition: Conditions[K]) {
@@ -44,7 +51,16 @@ export class Webhook_client {
 
         if (!subscription_request.ok) {
             console.error(`Failed to subscribe to event`);
+
+            const json = await subscription_request.json();
+
+            console.error(json);
+            return
         }
+
+        const json = await subscription_request.json();
+
+        return json;
 
     }
 
@@ -68,9 +84,9 @@ export class Webhook_client {
         }
     }
 
-    async get_subscriptions(): Promise<void>;
-    async get_subscriptions(filter: SubscriptionFilter, value: string): Promise<void>;
-    async get_subscriptions(filter?: SubscriptionFilter, value?: string) {
+    async get_subscriptions(): Promise<any>;
+    async get_subscriptions(filter: SubscriptionFilter, value: string): Promise<any>;
+    async get_subscriptions(filter?: SubscriptionFilter, value?: string): Promise<any> {
         const url = new URL("eventsub/subscriptions", TWITCH_API_URL);
 
         if (filter === "status" && value) {
@@ -93,5 +109,7 @@ export class Webhook_client {
         if (!get_subscriptions_request.ok) {
             console.error(`Failed to get subscriptions`);
         }
+
+        return await get_subscriptions_request.json();
     }
 }
