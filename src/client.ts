@@ -22,8 +22,8 @@ export class Webhook_client {
         this.callback = options.callback;
         this.secret = options.secret;
     }
-
-    async subscribe<K extends keyof Conditions>(event: K, condition: Conditions[K]) {
+    
+    async subscribe<K extends keyof Conditions>(event: K, condition: Conditions[K], userToken?: string) {
 
         const url = new URL("eventsub/subscriptions", TWITCH_API_URL);
 
@@ -38,10 +38,12 @@ export class Webhook_client {
             type: event
         }
 
+        const token = userToken || this.token;
+
         const subscription_request = await fetch(url, {
             method: "POST",
             headers: {
-                "Authorization": `Bearer ${this.token}`,
+                "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json",
                 "Client-Id": this.client_id
             },
