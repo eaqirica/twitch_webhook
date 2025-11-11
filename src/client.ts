@@ -1,27 +1,52 @@
 import type { Conditions } from "./conditions";
-import type { Subscription, SubscriptionFilter } from "./types";
+import type { Subscription, SubscriptionFilter, TwitchAuthResponse } from "./types";
 
 export const TWITCH_API_URL = "https://api.twitch.tv/helix/";
+export const TWITCH_AUTH_URL = "https://id.twitch.tv/oauth2/token";
 
 export interface WebhookClientOptions {
     clientId: string;
-    token: string;
+    token?: string;
     callback: string;
     secret: string;
 }
 
 export class Webhook_client {
     private client_id: string;
-    private token: string;
+    private token?: string;
     private callback: string;
     private secret: string;
 
     constructor(options: WebhookClientOptions) {
         this.client_id = options.clientId;
-        this.token = options.token;
+        this.token = options.token || "INVALID_TOKEN";
         this.callback = options.callback;
         this.secret = options.secret;
     }
+
+    async auth() {
+        const url = new URL(TWITCH_AUTH_URL);
+        url.searchParams.append("client_id", this.client_id);
+        url.searchParams.append("client_secret", this.secret);
+        url.searchParams.append("grant_type", "client_credentials");
+
+        const auth_request = await fetch(url, {
+            method: "POST",
+        });
+
+        const json = await auth_request.json() as TwitchAuthResponse;
+
+        if (!auth_request.ok) {
+            console.error(`Failed to authenticate`);
+            console.error(json);
+            return;
+        }
+
+        this.token = json.access_token;
+
+        return this.token;
+    }
+
     
     async subscribe<K extends keyof Conditions>(event: K, condition: Conditions[K], userToken?: string) {
 
