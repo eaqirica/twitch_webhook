@@ -1,6 +1,13 @@
 import type { Conditions } from "./conditions";
 import type { Events } from "./events"; 
 
+
+export type TwitchAuthResponse = {
+    access_token: string;
+    expires_in: number;
+    token_type: string;
+}
+
 export type WebhookTransport = {
     method: "webhook";
     callback: string;
