@@ -187,12 +187,5 @@ function getHmac(secret: string, message: string): string {
 }
 
 function verifyMessage(hmac: string, verifySignature: string): boolean {
-    try {
-        return crypto.timingSafeEqual(
-            Buffer.from(hmac),
-            Buffer.from(verifySignature)
-        );
-    } catch (e) {
-        return false;
-    }
+    return crypto.timingSafeEqual(Buffer.from(hmac), Buffer.from(verifySignature));
 }
